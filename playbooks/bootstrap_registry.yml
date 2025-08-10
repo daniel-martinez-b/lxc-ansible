@@ -1,0 +1,76 @@
+- name: Create registry LXC with Terraform, then bootstrap
+  hosts: localhost
+  gather_facts: no
+  vars:
+    terraform_dir: "{{ playbook_dir }}/../terraform-lxc-registry"
+
+  tasks:
+    - name: Terraform init
+      command: terraform init
+      args:
+        chdir: "{{ terraform_dir }}"
+      delegate_to: localhost
+
+    - name: Terraform apply
+      command: terraform apply -auto-approve
+      args:
+        chdir: "{{ terraform_dir }}"
+      delegate_to: localhost
+
+    - name: Get registry IP from terraform output
+      command: terraform output -raw registry_ip
+      args:
+        chdir: "{{ terraform_dir }}"
+      register: registry_ip
+      delegate_to: localhost
+
+    - name: Add registry container to inventory for bootstrap
+      add_host:
+        name: "{{ registry_ip.stdout }}"
+        groups: registry
+        ansible_user: root
+        ansible_password: "{{ lookup('ini', 'registry ansible_password', section='registry', file=playbook_dir + '/../inventory/hosts.ini') }}"
+
+- name: Bootstrap registry container
+  hosts: registry
+  become: yes
+  tasks:
+    - name: Install packages
+      apt:
+        name:
+          - podman
+          - ca-certificates
+          - apache2-utils
+        update_cache: yes
+        state: present
+
+    - name: Ensure data dir exists
+      file:
+        path: /var/lib/registry
+        state: directory
+        mode: "0755"
+
+    - name: Deploy Quadlet container file
+      copy:
+        dest: /etc/containers/systemd/oci-registry.container
+        content: |
+          [Unit]
+          Description=OCI Registry (registry:2) via Podman
+
+          [Container]
+          Image=registry:2
+          PublishPort=5000:5000
+          Volume=/var/lib/registry:/var/lib/registry
+          Environment=REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY=/var/lib/registry
+
+          [Install]
+          WantedBy=default.target
+      notify: restart registry
+
+  handlers:
+    - name: restart registry
+      systemd:
+        name: oci-registry.service
+        daemon_reload: yes
+        enabled: yes
+        state: restarted

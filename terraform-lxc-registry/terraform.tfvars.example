@@ -1,0 +1,16 @@
+proxmox_api_url              = "https://192.168.0.5:8006/api2/json"
+proxmox_api_token_id         = ""
+proxmox_api_token_secret     = ""
+proxmox_ssh_password         = ""
+proxmox_node_1               = "nuc1"
+
+registry_root_password       = ""
+registry_ip_cidr             = "192.168.0.60/24"
+
+network_config = {
+  bridge      = "vmbr0"
+  gateway     = "192.168.0.1"
+  subnet      = "192.168.0.0/24"  
+  domain      = "unbkbl.lan"
+  dns_servers = ["192.168.0.137"]
+}
