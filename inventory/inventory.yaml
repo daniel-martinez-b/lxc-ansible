@@ -1,0 +1,6 @@
+all:
+  children:
+    registry:
+      hosts:
+        cr.unbkbl.lan:
+          ansible_host: 192.168.0.10

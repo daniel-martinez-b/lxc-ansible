@@ -1,35 +1,35 @@
-- name: Create registry LXC with Terraform, then bootstrap
-  hosts: localhost
-  gather_facts: no
-  vars:
-    terraform_dir: "{{ playbook_dir }}/../terraform-lxc-registry"
+# - name: Create registry LXC with Terraform, then bootstrap
+#   hosts: localhost
+#   gather_facts: no
+#   vars:
+#     terraform_dir: "{{ playbook_dir }}/../terraform-lxc-registry"
 
-  tasks:
-    - name: Terraform init
-      command: terraform init
-      args:
-        chdir: "{{ terraform_dir }}"
-      delegate_to: localhost
+#   tasks:
+#     - name: Terraform init
+#       command: terraform init
+#       args:
+#         chdir: "{{ terraform_dir }}"
+#       delegate_to: localhost
 
-    - name: Terraform apply
-      command: terraform apply -auto-approve
-      args:
-        chdir: "{{ terraform_dir }}"
-      delegate_to: localhost
+#     - name: Terraform apply
+#       command: terraform apply -auto-approve
+#       args:
+#         chdir: "{{ terraform_dir }}"
+#       delegate_to: localhost
 
-    - name: Get registry IP from terraform output
-      command: terraform output -raw registry_ip
-      args:
-        chdir: "{{ terraform_dir }}"
-      register: registry_ip
-      delegate_to: localhost
+#     - name: Get registry IP from terraform output
+#       command: terraform output -raw registry_ip
+#       args:
+#         chdir: "{{ terraform_dir }}"
+#       register: registry_ip
+#       delegate_to: localhost
 
-    - name: Add registry container to inventory for bootstrap
-      add_host:
-        name: "{{ registry_ip.stdout }}"
-        groups: registry
-        ansible_user: root
-        ansible_password: "{{ lookup('ini', 'registry ansible_password', section='registry', file=playbook_dir + '/../inventory/hosts.ini') }}"
+#     - name: Add registry container to inventory for bootstrap
+#       add_host:
+#         name: "{{ registry_ip.stdout }}"
+#         groups: registry
+#         ansible_user: root
+#         ansible_password: "{{ lookup('ini', 'registry ansible_password', section='registry', file=playbook_dir + '/../inventory/hosts.ini') }}"
 
 - name: Bootstrap registry container
   hosts: registry

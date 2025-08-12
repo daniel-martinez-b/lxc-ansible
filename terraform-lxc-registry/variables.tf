@@ -11,7 +11,7 @@ variable "template_datastore_id" {
 }
 
 variable "debian12_lxc_template_url" {
-  default = "http://download.proxmox.com/images/system/ubuntu-24.04-standard_24.04-2_amd64.tar.zst"
+  default = "http://download.proxmox.com/images/system/debian-12-standard_12.7-1_amd64.tar.zst"
 }
 
 variable "rootfs_datastore_id" {
