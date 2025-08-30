@@ -66,8 +66,7 @@ resource "proxmox_virtual_environment_container" "registry" {
   initialization {
     ip_config {
       ipv4 {
-        address = var.registry_ip_cidr
-        gateway = var.network_config.gateway
+        address = "dhcp"
       }
     }
     dns {
